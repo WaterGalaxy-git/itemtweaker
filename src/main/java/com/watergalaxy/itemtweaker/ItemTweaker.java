@@ -518,6 +518,27 @@ public class ItemTweaker implements ModInitializer {
                         }
                     }
 
+                    for (var entry : properties.entrySet()) {
+
+                        String key = entry.getKey();
+
+                        if (key.equals("max_stack_size")
+                                || key.equals("components")
+                                || key.equals("exclude")) {
+
+                            continue;
+                        }
+
+                        String componentId = key.contains(":")
+                                ? key
+                                : "minecraft:" + key;
+
+                        components.add(
+                                componentId,
+                                entry.getValue().deepCopy()
+                        );
+                    }
+
                     if (components.isEmpty()) {
                         LOGGER.warn(
                                 "No components configured for {}",
