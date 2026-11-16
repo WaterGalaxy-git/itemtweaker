@@ -10,6 +10,8 @@ vanilla and modded items. Supports tag-based targeting,
 wildcards, and exclusions so you can change entire categories
 of items in a single entry.
 
+All changes are fully reversible. Simply remove the mod to restore every item to its original state.
+
 **Requires:** Fabric API
 
 ---
@@ -274,6 +276,9 @@ JSON structure.
 - Invalid component values are reported in the log.
 - Default-component changes require a restart.
 - Not every item property is a data component.
+- Changes are non-destructive and fully reversible. Removing
+  the mod restores all items to their original defaults with
+  no leftover data in your world.
 
 ## Troubleshooting
 
