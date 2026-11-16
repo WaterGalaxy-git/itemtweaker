@@ -1,4 +1,18 @@
-# ItemTweaker Configuration Guide
+# ItemTweaker
+
+A lightweight Fabric mod that lets you change item properties
+from a single JSON config file. No datapacks, no commands,
+no code.
+
+Tweak durability, stack sizes, attack attributes, food values,
+rarity, enchantments, and any other data component for both
+vanilla and modded items. Supports tag-based targeting,
+wildcards, and exclusions so you can change entire categories
+of items in a single entry.
+
+**Requires:** Fabric API
+
+---
 
 ## Where to configure items
 
