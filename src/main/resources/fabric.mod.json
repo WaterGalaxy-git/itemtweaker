@@ -10,9 +10,6 @@
   "icon": "assets/itemtweaker/icon.png",
   "environment": "*",
   "entrypoints": {
-    "client": [
-      "com.watergalaxy.itemtweaker.client.ItemtweakerClient"
-    ],
     "main": [
       "com.watergalaxy.itemtweaker.ItemTweaker"
     ]
