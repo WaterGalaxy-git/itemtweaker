@@ -3,7 +3,7 @@
   "id": "itemtweaker",
   "version": "${version}",
   "name": "ItemTweaker",
-  "description": "Configure item data components — durability, stack size, attributes, food, and more — from a simple JSON file. No datapacks required.",
+  "description": "Configure any vanilla or modded item's data components, including durability, stack size, attributes, food, and more, from a single JSON file. Works globally across all worlds, no datapacks required.",
   "authors": [],
   "contact": {},
   "license": "MIT",
