@@ -14,11 +14,11 @@ Configure any vanilla or modded item's data components, including durability, st
 logoFile = "assets/itemtweaker/icon.png"
 
 [[dependencies.itemtweaker]]
-modId = "neoforge"
-type = "required"
-versionRange = "[21.0.0,)"
-ordering = "NONE"
-side = "BOTH"
+modId="neoforge"
+type="required"
+versionRange="[26.1.2,)"
+ordering="NONE"
+side="BOTH"
 
 [[dependencies.itemtweaker]]
 modId = "minecraft"

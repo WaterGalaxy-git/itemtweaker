@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -282,6 +283,8 @@ public class ItemTweaker {
             }
         }
 
+        ItemAttributeModifiers existingAttributes = builder.build().get(DataComponents.ATTRIBUTE_MODIFIERS);
+
         for (var entry : components.entrySet()) {
 
             String componentId = entry.getKey();
@@ -290,7 +293,7 @@ public class ItemTweaker {
 
                 if (!components.has("minecraft:attribute_modifiers")) {
 
-                    ItemAttributeModifiers stripped = removeAttributeModifiers(item, attributesToRemove);
+                    ItemAttributeModifiers stripped = removeAttributeModifiers(existingAttributes, attributesToRemove);
 
                     if (stripped != null) {
                         setComponent(builder, DataComponents.ATTRIBUTE_MODIFIERS, stripped);
@@ -326,7 +329,7 @@ public class ItemTweaker {
                 if (value == null) continue;
 
                 if (componentId.equals("minecraft:attribute_modifiers")) {
-                    value = mergeAttributeModifiers(item, (ItemAttributeModifiers) value, attributesToRemove);
+                    value = mergeAttributeModifiers(existingAttributes, (ItemAttributeModifiers) value, attributesToRemove);
                 }
 
                 setComponent(builder, componentType, value);
@@ -338,8 +341,7 @@ public class ItemTweaker {
         }
     }
 
-    private static ItemAttributeModifiers mergeAttributeModifiers(Item item, ItemAttributeModifiers userModifiers, Set<String> toRemove) {
-        ItemAttributeModifiers existing = item.components().get(DataComponents.ATTRIBUTE_MODIFIERS);
+    private static ItemAttributeModifiers mergeAttributeModifiers(ItemAttributeModifiers existing, ItemAttributeModifiers userModifiers, Set<String> toRemove) {
         List<ItemAttributeModifiers.Entry> merged = new ArrayList<>();
 
         if (existing != null) {
@@ -359,9 +361,7 @@ public class ItemTweaker {
         return new ItemAttributeModifiers(merged);
     }
 
-    private static ItemAttributeModifiers removeAttributeModifiers(Item item, Set<String> toRemove) {
-        ItemAttributeModifiers existing = item.components().get(DataComponents.ATTRIBUTE_MODIFIERS);
-
+    private static ItemAttributeModifiers removeAttributeModifiers(ItemAttributeModifiers existing, Set<String> toRemove) {
         if (existing == null) return null;
 
         List<ItemAttributeModifiers.Entry> kept = new ArrayList<>();
@@ -626,5 +626,34 @@ public class ItemTweaker {
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static void setComponent(DataComponentMap.Builder builder, DataComponentType<?> componentType, Object value) {
         builder.set((DataComponentType) componentType, value);
+    }
+
+    private static final Field BUILDER_VALIDATOR_FIELD;
+
+    static {
+        Field found = null;
+        try {
+            for (Field f : DataComponentMap.Builder.class.getDeclaredFields()) {
+                if (java.util.function.Consumer.class.isAssignableFrom(f.getType())) {
+                    f.setAccessible(true);
+                    found = f;
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to access Builder validator field", e);
+        }
+        BUILDER_VALIDATOR_FIELD = found;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void clearBuilderValidator(DataComponentMap.Builder builder) {
+        if (BUILDER_VALIDATOR_FIELD != null) {
+            try {
+                BUILDER_VALIDATOR_FIELD.set(builder, (java.util.function.Consumer<Object>) map -> {});
+            } catch (Exception e) {
+                LOGGER.error("Failed to clear builder validator", e);
+            }
+        }
     }
 }

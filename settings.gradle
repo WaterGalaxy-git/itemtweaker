@@ -1,9 +1,21 @@
 pluginManagement {
     repositories {
-        maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
-        }
+        maven { url = "https://maven.fabricmc.net/" }
+        maven { url = "https://maven.neoforged.net/releases" }
         gradlePluginPortal()
     }
+    plugins {
+        id 'net.fabricmc.fabric-loom' version '1.19.4'
+        id 'net.neoforged.moddev' version '2.0.141'
+    }
 }
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
+rootProject.name = "ItemTweaker"
+
+include("common")
+include("fabric")
+include("neoforge")
