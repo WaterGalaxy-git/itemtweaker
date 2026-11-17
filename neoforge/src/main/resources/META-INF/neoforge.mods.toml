@@ -1,0 +1,28 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/WaterGalaxy-git/itemtweaker/issues"
+
+[[mods]]
+modId = "itemtweaker"
+version = "${version}"
+displayName = "ItemTweaker"
+authors = "WaterGalaxy"
+description = """
+Configure any vanilla or modded item's data components, including durability, stack size, attributes, food, and more, from a single JSON file.
+"""
+logoFile = "assets/itemtweaker/icon.png"
+
+[[dependencies.itemtweaker]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.0.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.itemtweaker]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.2,)"
+ordering = "NONE"
+side = "BOTH"

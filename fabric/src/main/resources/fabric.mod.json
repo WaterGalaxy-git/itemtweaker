@@ -11,7 +11,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.watergalaxy.itemtweaker.ItemTweaker"
+      "com.watergalaxy.itemtweaker.fabric.ItemTweakerFabric"
     ]
   },
   "depends": {
