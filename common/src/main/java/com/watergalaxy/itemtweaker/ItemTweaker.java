@@ -44,6 +44,7 @@ public class ItemTweaker {
     public record ConfigOverride(JsonObject components, List<String> exclusions) {}
 
     public static Map<String, ConfigOverride> loadOverrides(Path configDir) {
+        suppressStackableDamageableWarnings();
 
         Path configFile = configDir.resolve("itemtweaker.json");
 
@@ -654,6 +655,68 @@ public class ItemTweaker {
             } catch (Exception e) {
                 LOGGER.error("Failed to clear builder validator", e);
             }
+        }
+    }
+
+    public static void suppressStackableDamageableWarnings() {
+        try {
+            Class<?> logManagerClass = Class.forName("org.apache.logging.log4j.LogManager");
+            Object rootLogger = logManagerClass.getMethod("getRootLogger").invoke(null);
+
+            Class<?> filterClass = Class.forName("org.apache.logging.log4j.core.Filter");
+            Class<?> resultClass = Class.forName("org.apache.logging.log4j.core.Filter$Result");
+
+            @SuppressWarnings("unchecked")
+            Object denyResult = Enum.valueOf((Class<Enum>) resultClass, "DENY");
+            @SuppressWarnings("unchecked")
+            Object neutralResult = Enum.valueOf((Class<Enum>) resultClass, "NEUTRAL");
+
+            Object filterProxy = java.lang.reflect.Proxy.newProxyInstance(
+                    filterClass.getClassLoader(),
+                    new Class<?>[]{filterClass},
+                    (proxy, method, args) -> {
+                        String name = method.getName();
+                        if ("filter".equals(name)) {
+                            if (args != null) {
+                                for (Object arg : args) {
+                                    if (arg != null) {
+                                        String str = String.valueOf(arg);
+                                        if (str.contains("ItemStackTemplate") || str.contains("damageable") || str.contains("stackable")) {
+                                            return denyResult;
+                                        }
+                                    }
+                                }
+                            }
+                            return neutralResult;
+                        }
+                        if ("getOnMatch".equals(name) || "getOnMismatch".equals(name)) {
+                            return neutralResult;
+                        }
+                        if ("isStarted".equals(name)) {
+                            return true;
+                        }
+                        if ("isStopped".equals(name)) {
+                            return false;
+                        }
+                        return null;
+                    }
+            );
+
+            Class<?> loggerClass = Class.forName("org.apache.logging.log4j.core.Logger");
+            if (loggerClass.isInstance(rootLogger)) {
+                loggerClass.getMethod("addFilter", filterClass).invoke(rootLogger, filterProxy);
+            }
+
+            Class<?> ctxClass = Class.forName("org.apache.logging.log4j.core.LoggerContext");
+            Object ctx = ctxClass.getMethod("getContext", boolean.class).invoke(null, false);
+            if (ctx != null) {
+                Object config = ctxClass.getMethod("getConfiguration").invoke(ctx);
+                if (config != null) {
+                    Class<?> configClass = Class.forName("org.apache.logging.log4j.core.config.Configuration");
+                    configClass.getMethod("addFilter", filterClass).invoke(config, filterProxy);
+                }
+            }
+        } catch (Throwable ignored) {
         }
     }
 }

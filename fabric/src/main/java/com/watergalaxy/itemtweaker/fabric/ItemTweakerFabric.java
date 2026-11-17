@@ -36,7 +36,10 @@ public final class ItemTweakerFabric implements ModInitializer {
 
             context.modify(
                     item -> true,
-                    (builder, item) -> ItemTweaker.applyOverridesToItem(item, builder, overrides, registryOps, matchedSelectors, applyCounts)
+                    (builder, item) -> {
+                        ItemTweaker.clearBuilderValidator(builder);
+                        ItemTweaker.applyOverridesToItem(item, builder, overrides, registryOps, matchedSelectors, applyCounts);
+                    }
             );
 
             ItemTweaker.logApplySummary(applyCounts);
