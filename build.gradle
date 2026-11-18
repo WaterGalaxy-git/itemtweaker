@@ -8,7 +8,11 @@ subprojects {
     apply plugin: "java"
 
     group = "com.watergalaxy"
-    version = project.mod_version
+    version = "${project.mod_version}+${project.minecraft_version}"
+
+    base {
+        archivesName = "${project.archives_base_name}-${project.name}"
+    }
 
     repositories {
         mavenCentral()
