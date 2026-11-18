@@ -21,8 +21,8 @@ ordering="NONE"
 side="BOTH"
 
 [[dependencies.itemtweaker]]
-modId = "minecraft"
-type = "required"
-versionRange = "[26.1.2,)"
-ordering = "NONE"
-side = "BOTH"
+modId="minecraft"
+type="required"
+versionRange="[26.1.2,26.4)"
+ordering="NONE"
+side="BOTH"
