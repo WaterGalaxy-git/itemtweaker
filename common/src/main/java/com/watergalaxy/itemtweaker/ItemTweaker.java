@@ -472,8 +472,9 @@ public class ItemTweaker {
                 document.append(entry).append('\n');
             }
 
-            Files.writeString(output, document.toString(), StandardCharsets.UTF_8);
-            LOGGER.info("Generated component reference with {} entries.", entries.size());
+            if (writeIfChanged(output, document.toString())) {
+                LOGGER.info("Generated component reference with {} entries.", entries.size());
+            }
 
         } catch (IOException exception) {
             LOGGER.error("Failed to generate component reference.", exception);
@@ -527,8 +528,9 @@ public class ItemTweaker {
                 document.append(entry).append('\n');
             }
 
-            Files.writeString(output, document.toString(), StandardCharsets.UTF_8);
-            LOGGER.info("Generated attribute reference with {} entries.", entries.size());
+            if (writeIfChanged(output, document.toString())) {
+                LOGGER.info("Generated attribute reference with {} entries.", entries.size());
+            }
 
         } catch (IOException exception) {
             LOGGER.error("Failed to generate attribute reference.", exception);
@@ -586,8 +588,9 @@ public class ItemTweaker {
                 document.append(entry).append('\n');
             }
 
-            Files.writeString(output, document.toString(), StandardCharsets.UTF_8);
-            LOGGER.info("Generated tag reference with {} entries.", entries.size());
+            if (writeIfChanged(output, document.toString())) {
+                LOGGER.info("Generated tag reference with {} entries.", entries.size());
+            }
 
         } catch (IOException exception) {
             LOGGER.error("Failed to generate tag reference.", exception);
@@ -621,6 +624,16 @@ public class ItemTweaker {
         } catch (IOException exception) {
             LOGGER.error("Failed to extract bundled documentation.", exception);
         }
+    }
+
+    private static boolean writeIfChanged(Path output, String content) throws IOException {
+        if (Files.exists(output)
+                && Files.readString(output, StandardCharsets.UTF_8).equals(content)) {
+            return false;
+        }
+
+        Files.writeString(output, content, StandardCharsets.UTF_8);
+        return true;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

@@ -69,7 +69,6 @@ public final class ItemTweakerNeoForge {
     }
 
     private void onTagsUpdated(TagsUpdatedEvent event) {
-        Path configDir = FMLPaths.CONFIGDIR.get();
-        ItemTweaker.generateDocsAndReferences(configDir);
+        ItemTweaker.generateDocsAndReferences(FMLPaths.CONFIGDIR.get());
     }
 }
