@@ -35,7 +35,7 @@ public final class ItemTweakerFabric implements ModInitializer {
             Map<String, Integer> applyCounts = new HashMap<>();
 
             context.modify(
-                    item -> true,
+                    _ -> true,
                     (builder, item) -> {
                         ItemTweaker.clearBuilderValidator(builder);
                         ItemTweaker.applyOverridesToItem(item, builder, overrides, registryOps, matchedSelectors, applyCounts);

@@ -20,6 +20,14 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.filter.AbstractFilter;
+import org.apache.logging.log4j.message.Message;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -35,9 +43,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ItemTweaker {
-
+    @SuppressWarnings("unused")
     public static final String MOD_ID = "itemtweaker";
     public static final Logger LOGGER = LoggerFactory.getLogger("ItemTweaker");
 
@@ -196,7 +206,6 @@ public class ItemTweaker {
 
             applyComponents(
                     builder,
-                    item,
                     itemId,
                     selector,
                     override.components,
@@ -263,7 +272,6 @@ public class ItemTweaker {
 
     private static void applyComponents(
             DataComponentMap.Builder builder,
-            Item item,
             String itemId,
             String selector,
             JsonObject components,
@@ -630,6 +638,7 @@ public class ItemTweaker {
     }
 
     private static final Field BUILDER_VALIDATOR_FIELD;
+    private static final Consumer<Object> NO_OP_VALIDATOR = _ -> {};
 
     static {
         Field found = null;
@@ -647,76 +656,55 @@ public class ItemTweaker {
         BUILDER_VALIDATOR_FIELD = found;
     }
 
-    @SuppressWarnings("unchecked")
     public static void clearBuilderValidator(DataComponentMap.Builder builder) {
         if (BUILDER_VALIDATOR_FIELD != null) {
             try {
-                BUILDER_VALIDATOR_FIELD.set(builder, (java.util.function.Consumer<Object>) map -> {});
+                BUILDER_VALIDATOR_FIELD.set(builder, NO_OP_VALIDATOR);
             } catch (Exception e) {
                 LOGGER.error("Failed to clear builder validator", e);
             }
         }
     }
 
+    private static final AtomicBoolean WARNING_FILTER_INSTALLED = new AtomicBoolean();
+
     public static void suppressStackableDamageableWarnings() {
+        if (!WARNING_FILTER_INSTALLED.compareAndSet(false, true)) {
+            return;
+        }
+
         try {
-            Class<?> logManagerClass = Class.forName("org.apache.logging.log4j.LogManager");
-            Object rootLogger = logManagerClass.getMethod("getRootLogger").invoke(null);
+            LoggerContext context = (LoggerContext) LogManager.getContext(false);
+            StackableDamageableWarningFilter filter = new StackableDamageableWarningFilter();
 
-            Class<?> filterClass = Class.forName("org.apache.logging.log4j.core.Filter");
-            Class<?> resultClass = Class.forName("org.apache.logging.log4j.core.Filter$Result");
+            context.getConfiguration().addFilter(filter);
+            context.getRootLogger().addFilter(filter);
+            context.updateLoggers();
+        } catch (RuntimeException | LinkageError exception) {
+            WARNING_FILTER_INSTALLED.set(false);
+            LOGGER.warn("Could not install the stackable/damageable warning filter.", exception);
+        }
+    }
 
-            @SuppressWarnings("unchecked")
-            Object denyResult = Enum.valueOf((Class<Enum>) resultClass, "DENY");
-            @SuppressWarnings("unchecked")
-            Object neutralResult = Enum.valueOf((Class<Enum>) resultClass, "NEUTRAL");
-
-            Object filterProxy = java.lang.reflect.Proxy.newProxyInstance(
-                    filterClass.getClassLoader(),
-                    new Class<?>[]{filterClass},
-                    (proxy, method, args) -> {
-                        String name = method.getName();
-                        if ("filter".equals(name)) {
-                            if (args != null) {
-                                for (Object arg : args) {
-                                    if (arg != null) {
-                                        String str = String.valueOf(arg);
-                                        if (str.contains("ItemStackTemplate") || str.contains("damageable") || str.contains("stackable")) {
-                                            return denyResult;
-                                        }
-                                    }
-                                }
-                            }
-                            return neutralResult;
-                        }
-                        if ("getOnMatch".equals(name) || "getOnMismatch".equals(name)) {
-                            return neutralResult;
-                        }
-                        if ("isStarted".equals(name)) {
-                            return true;
-                        }
-                        if ("isStopped".equals(name)) {
-                            return false;
-                        }
-                        return null;
-                    }
-            );
-
-            Class<?> loggerClass = Class.forName("org.apache.logging.log4j.core.Logger");
-            if (loggerClass.isInstance(rootLogger)) {
-                loggerClass.getMethod("addFilter", filterClass).invoke(rootLogger, filterProxy);
+    private static final class StackableDamageableWarningFilter extends AbstractFilter {
+        @Override
+        public Filter.Result filter(LogEvent event) {
+            if (event == null || event.getLevel() != Level.WARN) {
+                return Filter.Result.NEUTRAL;
             }
 
-            Class<?> ctxClass = Class.forName("org.apache.logging.log4j.core.LoggerContext");
-            Object ctx = ctxClass.getMethod("getContext", boolean.class).invoke(null, false);
-            if (ctx != null) {
-                Object config = ctxClass.getMethod("getConfiguration").invoke(ctx);
-                if (config != null) {
-                    Class<?> configClass = Class.forName("org.apache.logging.log4j.core.config.Configuration");
-                    configClass.getMethod("addFilter", filterClass).invoke(config, filterProxy);
-                }
+            Message message = event.getMessage();
+            if (message == null) {
+                return Filter.Result.NEUTRAL;
             }
-        } catch (Throwable ignored) {
+
+            String text = message.getFormattedMessage();
+            if (text.contains("Can't create item stack with properties")
+                    && text.contains("Item cannot be both damageable and stackable")) {
+                return Filter.Result.DENY;
+            }
+
+            return Filter.Result.NEUTRAL;
         }
     }
 }

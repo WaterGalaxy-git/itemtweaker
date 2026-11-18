@@ -50,15 +50,16 @@ public final class ItemTweakerNeoForge {
         for (Item item : BuiltInRegistries.ITEM) {
             event.modify(
                     item,
-                    builder -> {
+                    (builder, _, initializedItem) -> {
                         ItemTweaker.clearBuilderValidator(builder);
-                        ItemTweaker.applyOverridesToItem(item, builder, overrides, registryOps, matchedSelectors, applyCounts);
+                        ItemTweaker.applyOverridesToItem(
+                                initializedItem, builder, overrides, registryOps, matchedSelectors, applyCounts
+                        );
 
-                        if (processedItems.incrementAndGet() >= totalItems) {
-                            if (summaryLogged.compareAndSet(false, true)) {
-                                ItemTweaker.logApplySummary(applyCounts);
-                                ItemTweaker.checkUnmatchedSelectors(overrides, matchedSelectors);
-                            }
+                        if (processedItems.incrementAndGet() >= totalItems
+                                && summaryLogged.compareAndSet(false, true)) {
+                            ItemTweaker.logApplySummary(applyCounts);
+                            ItemTweaker.checkUnmatchedSelectors(overrides, matchedSelectors);
                         }
                     }
             );
