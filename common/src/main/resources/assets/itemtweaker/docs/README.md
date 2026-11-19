@@ -11,7 +11,7 @@ of items in a single entry.
 
 All changes are fully reversible. Simply remove the mod to restore every item to its original state.
 
-**Requires:** [Fabric API](https://modrinth.com/mod/fabric-api)
+**Requirements:** The Fabric version requires [Fabric API](https://modrinth.com/mod/fabric-api)
 
 ---
 
