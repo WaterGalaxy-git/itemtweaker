@@ -1,8 +1,7 @@
 # ItemTweaker
 
-A lightweight Fabric mod that lets you change item properties
-from a single JSON config file. No datapacks, no commands,
-no code.
+A lightweight Fabric/Neoforge mod that lets you change item properties
+from a single JSON config file. No datapacks, no commands, no code.
 
 Tweak durability, stack sizes, attack attributes, food values,
 rarity, enchantments, and any other data component for both
@@ -236,10 +235,10 @@ and add a fresh one with any ID in the same block:
 
 The player's base values are added on top of your amounts:
 
-| Stat          | Player base | `amount` for target of… |
-|---------------|-------------|-------------------------|
-| Attack damage | 1           | 11 → 12 total           |
-| Attack speed  | 4           | -2.0 → 2.0 total        |
+| Stat          | Player base | `amount` → total    |
+|---------------|-------------|---------------------|
+| Attack damage | 1           | 11 → 12 total       |
+| Attack speed  | 4           | -2.0 → 2.0 total    |
 
 See `attributes.md` for the full list of valid attribute IDs.
 
