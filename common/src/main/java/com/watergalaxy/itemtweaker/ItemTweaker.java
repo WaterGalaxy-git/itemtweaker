@@ -20,14 +20,6 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Filter;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.filter.AbstractFilter;
-import org.apache.logging.log4j.message.Message;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -44,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ItemTweaker {
     @SuppressWarnings("unused")
@@ -54,8 +45,6 @@ public class ItemTweaker {
     public record ConfigOverride(JsonObject components, List<String> exclusions) {}
 
     public static Map<String, ConfigOverride> loadOverrides(Path configDir) {
-        suppressStackableDamageableWarnings();
-
         Path configFile = configDir.resolve("itemtweaker.json");
 
         try {
@@ -676,48 +665,6 @@ public class ItemTweaker {
             } catch (Exception e) {
                 LOGGER.error("Failed to clear builder validator", e);
             }
-        }
-    }
-
-    private static final AtomicBoolean WARNING_FILTER_INSTALLED = new AtomicBoolean();
-
-    public static void suppressStackableDamageableWarnings() {
-        if (!WARNING_FILTER_INSTALLED.compareAndSet(false, true)) {
-            return;
-        }
-
-        try {
-            LoggerContext context = (LoggerContext) LogManager.getContext(false);
-            StackableDamageableWarningFilter filter = new StackableDamageableWarningFilter();
-
-            context.getConfiguration().addFilter(filter);
-            context.getRootLogger().addFilter(filter);
-            context.updateLoggers();
-        } catch (RuntimeException | LinkageError exception) {
-            WARNING_FILTER_INSTALLED.set(false);
-            LOGGER.warn("Could not install the stackable/damageable warning filter.", exception);
-        }
-    }
-
-    private static final class StackableDamageableWarningFilter extends AbstractFilter {
-        @Override
-        public Filter.Result filter(LogEvent event) {
-            if (event == null || event.getLevel() != Level.WARN) {
-                return Filter.Result.NEUTRAL;
-            }
-
-            Message message = event.getMessage();
-            if (message == null) {
-                return Filter.Result.NEUTRAL;
-            }
-
-            String text = message.getFormattedMessage();
-            if (text.contains("Can't create item stack with properties")
-                    && text.contains("Item cannot be both damageable and stackable")) {
-                return Filter.Result.DENY;
-            }
-
-            return Filter.Result.NEUTRAL;
         }
     }
 }
