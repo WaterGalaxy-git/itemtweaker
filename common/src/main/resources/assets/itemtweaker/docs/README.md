@@ -1,7 +1,8 @@
 # ItemTweaker
 
-A lightweight Fabric/Neoforge mod that lets you change item properties
+A lightweight Fabric/NeoForge mod that lets you change item properties
 from a single JSON config file. No datapacks, no commands, no code.
+Great for modpack fixes and balancing.
 
 Tweak durability, stack sizes, attack attributes, food values,
 rarity, enchantments, and any other data component for both
