@@ -4,8 +4,12 @@
   "version": "${version}",
   "name": "ItemTweaker",
   "description": "Configure any vanilla or modded item's data components, including durability, stack size, attributes, food, and more, from a single JSON file. Works globally across all worlds, no datapacks required.",
-  "authors": [],
-  "contact": {},
+  "authors": ["WaterGalaxy"],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/itemtweaker",
+    "sources": "https://github.com/WaterGalaxy-git/itemtweaker",
+    "issues": "https://github.com/WaterGalaxy-git/itemtweaker/issues"
+  },
   "license": "MIT",
   "icon": "assets/itemtweaker/icon.png",
   "environment": "*",
@@ -17,6 +21,6 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
-    "minecraft": "${minecraft_version}"
+    "minecraft": ">=26.1 <26.4-"
   }
 }
