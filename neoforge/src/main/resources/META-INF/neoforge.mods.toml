@@ -14,6 +14,9 @@ Configure any vanilla or modded item's data components, including durability, st
 """
 logoFile = "assets/itemtweaker/icon.png"
 
+[[mixins]]
+config = "itemtweaker.mixins.json"
+
 [[dependencies.itemtweaker]]
 modId="neoforge"
 type="required"

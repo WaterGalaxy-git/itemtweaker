@@ -18,6 +18,7 @@
       "com.watergalaxy.itemtweaker.fabric.ItemTweakerFabric"
     ]
   },
+  "mixins": ["itemtweaker.mixins.json"],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
